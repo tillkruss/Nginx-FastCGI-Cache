@@ -21,13 +21,13 @@ class NginxCache {
 		load_plugin_textdomain( 'nginx-cache', false, 'nginx-cache/languages' );
 
 		add_filter( 'option_nginx_cache_path', 'sanitize_text_field' );
+		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'add_plugin_action_link' ) );
 
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_menu', array( $this, 'add_admin_menu_page' ) );
 		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_node' ), 100 );
 		add_action( 'load-tools_page_nginx-cache', array( $this, 'do_admin_actions' ) );
 		add_action( 'load-tools_page_nginx-cache', array( $this, 'add_settings_notices' ) );
-		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'add_plugin_action_link' ) );
 
 	}
 
@@ -41,7 +41,7 @@ class NginxCache {
 
 		$path_error = $this->is_valid_path();
 
-		if ( isset( $_GET[ 'message' ] ) ) {
+		if ( isset( $_GET[ 'message' ] ) && ! isset( $_GET[ 'settings-updated' ] ) ) {
 
 			// show cache purge success message
 			if ( $_GET[ 'message' ] === 'cache-purged' ) {
@@ -65,7 +65,7 @@ class NginxCache {
 	public function do_admin_actions() {
 
 		// purge cache
-		if ( isset( $_GET[ 'action' ] ) && $_GET[ 'action' ] === 'purge-cache' ) {
+		if ( isset( $_GET[ 'action' ] ) && $_GET[ 'action' ] === 'purge-cache' && wp_verify_nonce( $_GET[ '_wpnonce' ], 'purge-cache' ) ) {
 
 			$result = $this->purge_zone();
 			wp_safe_redirect( admin_url( add_query_arg( 'message', is_wp_error( $result ) ? 'purge-cache-failed' : 'cache-purged', $this->admin_page ) ) );
@@ -80,7 +80,7 @@ class NginxCache {
 		// add "Nginx" node to admin-bar
 		$wp_admin_bar->add_node( array(
 			'id' => 'nginx-cache',
-			'title' => 'Nginx',
+			'title' => __( 'Nginx', 'nginx-cache' ),
 			'href' => admin_url( $this->admin_page )
 		) );
 
@@ -88,8 +88,8 @@ class NginxCache {
 		$wp_admin_bar->add_node( array(
 			'parent' => 'nginx-cache',
 			'id' => 'purge-cache',
-			'title' => 'Purge Cache',
-			'href' => admin_url( add_query_arg( 'action', 'purge-cache', $this->admin_page ) )
+			'title' => __( 'Purge Cache', 'nginx-cache' ),
+			'href' => wp_nonce_url( admin_url( add_query_arg( 'action', 'purge-cache', $this->admin_page ) ), 'purge-cache' )
 		) );
 
 	}
@@ -98,8 +98,8 @@ class NginxCache {
 
 		// add "Tools" sub-page
 		add_management_page(
-			'Nginx Cache',
-			'Nginx',
+			__( 'Nginx Cache', 'nginx-cache' ),
+			__( 'Nginx', 'nginx-cache' ),
 			'manage_options',
 			'nginx-cache',
 			array( $this, 'show_settings_page' )
