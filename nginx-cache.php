@@ -12,28 +12,51 @@ License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 */
 
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 class NginxCache {
 
-	protected $admin_page = 'tools.php?page=nginx-cache';
+	private $screen = 'tools_page_nginx-cache';
+	private $capability = 'manage_options';
+	private $admin_page = 'tools.php?page=nginx-cache';
 
 	public function __construct() {
 
 		load_plugin_textdomain( 'nginx-cache', false, 'nginx-cache/languages' );
 
 		add_filter( 'option_nginx_cache_path', 'sanitize_text_field' );
-		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'add_plugin_action_link' ) );
+		add_filter( 'option_nginx_auto_purge', 'absint' );
+		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'add_plugin_actions_links' ) );
 
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_menu', array( $this, 'add_admin_menu_page' ) );
 		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_node' ), 100 );
-		add_action( 'load-tools_page_nginx-cache', array( $this, 'do_admin_actions' ) );
-		add_action( 'load-tools_page_nginx-cache', array( $this, 'add_settings_notices' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
+		add_action( 'load-' . $this->screen, array( $this, 'do_admin_actions' ) );
+		add_action( 'load-' . $this->screen, array( $this, 'add_settings_notices' ) );
+
+		// use `nginx_cache_purge_actions` filter to alter default purge actions
+		$purge_actions = apply_filters(
+			'nginx_cache_purge_actions',
+			array(
+				'publish_phone', 'save_post', 'edit_post', 'delete_post', 'wp_trash_post', 'clean_post_cache',
+				'trackback_post', 'pingback_post', 'comment_post', 'edit_comment', 'delete_comment', 'wp_set_comment_status',
+				'switch_theme',
+				'wp_update_nav_menu',
+				'edit_user_profile_update'
+			)
+		);
+
+		foreach( (array) $purge_actions as $action ) {
+			add_action( $action, array( $this, 'purge_zone' ) );
+		}
 
 	}
 
 	public function register_settings() {
 
 		register_setting( 'nginx-cache', 'nginx_cache_path', 'sanitize_text_field' );
+		register_setting( 'nginx-cache', 'nginx_auto_purge', 'absint' );
 
 	}
 
@@ -53,7 +76,7 @@ class NginxCache {
 				add_settings_error( '', 'nginx_cache_path', sprintf( __( 'Cache could not be purged. %s', 'nginx-cache' ), wptexturize( $path_error ) ) );
 			}
 
-		} elseif ( is_wp_error( $path_error ) ) {
+		} elseif ( is_wp_error( $path_error ) && $path_error->get_error_code() === 'fs' ) {
 
 			// show cache path problem message
 			add_settings_error( '', 'nginx_cache_path', wptexturize( $path_error->get_error_message( 'fs' ) ) );
@@ -76,6 +99,11 @@ class NginxCache {
 	}
 
 	public function add_admin_bar_node( $wp_admin_bar ) {
+
+		// verify user capability
+		if ( ! current_user_can( $this->capability ) ) {
+			return;
+		}
 
 		// add "Nginx" node to admin-bar
 		$wp_admin_bar->add_node( array(
@@ -100,7 +128,7 @@ class NginxCache {
 		add_management_page(
 			__( 'Nginx Cache', 'nginx-cache' ),
 			__( 'Nginx', 'nginx-cache' ),
-			'manage_options',
+			$this->capability,
 			'nginx-cache',
 			array( $this, 'show_settings_page' )
 		);
@@ -121,13 +149,26 @@ class NginxCache {
 
 	}
 
+	public function enqueue_admin_styles( $hook_suffix ) {
+
+		if ( $hook_suffix === $this->screen ) {
+			$plugin = get_plugin_data( __FILE__ );
+			wp_enqueue_style( 'nginx-cache', plugin_dir_url( __FILE__ ) . 'settings-page.css', null, $plugin[ 'Version' ] );
+		}
+
+	}
+
 	private function is_valid_path() {
 
 		global $wp_filesystem;
 
-		if ( $this->initialize_filesystem() ) {
+		$path = get_option( 'nginx_cache_path' );
 
-			$path = get_option( 'nginx_cache_path' );
+		if ( empty( $path ) ) {
+			return new WP_Error( 'empty', __( '"Cache Zone Path" is empty.', 'nginx-cache' ) );
+		}
+
+		if ( $this->initialize_filesystem() ) {
 
 			if ( ! $wp_filesystem->exists( $path ) ) {
 				return new WP_Error( 'fs', __( '"Cache Zone Path" does not exist.', 'nginx-cache' ) );
@@ -137,13 +178,13 @@ class NginxCache {
 				return new WP_Error( 'fs', __( '"Cache Zone Path" is not a directory.', 'nginx-cache' ) );
 			}
 
-			if ( ! $wp_filesystem->is_writable( $path ) ) {
-				return new WP_Error( 'fs', __( '"Cache Zone Path" is not writable.', 'nginx-cache' ) );
-			}
-
 			$list = $wp_filesystem->dirlist( $path, true, true );
 			if ( ! $this->validate_dirlist( $list ) ) {
 				return new WP_Error( 'fs', __( '"Cache Zone Path" does not appear to be a Nginx cache zone directory.', 'nginx-cache' ) );
+			}
+
+			if ( ! $wp_filesystem->is_writable( $path ) ) {
+				return new WP_Error( 'fs', __( '"Cache Zone Path" is not writable.', 'nginx-cache' ) );
 			}
 
 			return true;
@@ -158,13 +199,13 @@ class NginxCache {
 
 		foreach ( $list as $item ) {
 
-			// validate subdirectories recursively
-			if ( $item[ 'type' ] === 'd' && ! $this->validate_dirlist( $item[ 'files' ] ) ) {
+			// abort if file is not a MD5 hash
+			if ( $item[ 'type' ] === 'f' && ( strlen( $item[ 'name' ] ) !== 32 || ! ctype_xdigit( $item[ 'name' ] ) ) ) {
 				return false;
 			}
 
-			// abort if file is not a md5 hash
-			if ( $item[ 'type' ] === 'f' && ( strlen( $item[ 'name' ] ) !== 32 || ! ctype_xdigit( $item[ 'name' ] ) ) ) {
+			// validate subdirectories recursively
+			if ( $item[ 'type' ] === 'd' && ! $this->validate_dirlist( $item[ 'files' ] ) ) {
 				return false;
 			}
 
@@ -174,7 +215,7 @@ class NginxCache {
 
 	}
 
-	private function purge_zone() {
+	public function purge_zone() {
 
 		global $wp_filesystem;
 
