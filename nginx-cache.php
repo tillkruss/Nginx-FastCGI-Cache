@@ -2,7 +2,7 @@
 /*
 Plugin Name: Nginx Cache
 Plugin URI: http://wordpress.org/plugins/nginx-cache/
-Description: ...
+Description: Purge the Nginx cache (FastCGI, Proxy, uWSGI) automatically when content changes or manually within WordPress.
 Version: 1.0
 Text Domain: nginx-cache
 Domain Path: /languages
@@ -36,19 +36,17 @@ class NginxCache {
 		add_action( 'load-' . $this->screen, array( $this, 'add_settings_notices' ) );
 
 		// use `nginx_cache_purge_actions` filter to alter default purge actions
-		$purge_actions = apply_filters(
+		$purge_actions = (array) apply_filters(
 			'nginx_cache_purge_actions',
 			array(
 				'publish_phone', 'save_post', 'edit_post', 'delete_post', 'wp_trash_post', 'clean_post_cache',
 				'trackback_post', 'pingback_post', 'comment_post', 'edit_comment', 'delete_comment', 'wp_set_comment_status',
-				'switch_theme',
-				'wp_update_nav_menu',
-				'edit_user_profile_update'
+				'switch_theme', 'wp_update_nav_menu', 'edit_user_profile_update'
 			)
 		);
 
-		foreach( (array) $purge_actions as $action ) {
-			add_action( $action, array( $this, 'purge_zone' ) );
+		foreach ( $purge_actions as $action ) {
+			add_action( $action, array( $this, 'purge_zone_once' ) );
 		}
 
 	}
@@ -73,7 +71,7 @@ class NginxCache {
 
 			// show cache purge failure message
 			if ( $_GET[ 'message' ] === 'purge-cache-failed' ) {
-				add_settings_error( '', 'nginx_cache_path', sprintf( __( 'Cache could not be purged. %s', 'nginx-cache' ), wptexturize( $path_error ) ) );
+				add_settings_error( '', 'nginx_cache_path', sprintf( __( 'Cache could not be purged. %s', 'nginx-cache' ), wptexturize( $path_error->get_error_message() ) ) );
 			}
 
 		} elseif ( is_wp_error( $path_error ) && $path_error->get_error_code() === 'fs' ) {
@@ -136,7 +134,7 @@ class NginxCache {
 	}
 
 	public function show_settings_page() {
-		require_once plugin_dir_path( __FILE__ ) . '/settings-page.php';
+		require_once plugin_dir_path( __FILE__ ) . '/includes/settings-page.php';
 	}
 
 	public function add_plugin_actions_links( $links ) {
@@ -153,7 +151,7 @@ class NginxCache {
 
 		if ( $hook_suffix === $this->screen ) {
 			$plugin = get_plugin_data( __FILE__ );
-			wp_enqueue_style( 'nginx-cache', plugin_dir_url( __FILE__ ) . 'settings-page.css', null, $plugin[ 'Version' ] );
+			wp_enqueue_style( 'nginx-cache', plugin_dir_url( __FILE__ ) . 'includes/settings-page.css', null, $plugin[ 'Version' ] );
 		}
 
 	}
@@ -165,7 +163,7 @@ class NginxCache {
 		$path = get_option( 'nginx_cache_path' );
 
 		if ( empty( $path ) ) {
-			return new WP_Error( 'empty', __( '"Cache Zone Path" is empty.', 'nginx-cache' ) );
+			return new WP_Error( 'empty', __( '"Cache Zone Path" is not set.', 'nginx-cache' ) );
 		}
 
 		if ( $this->initialize_filesystem() ) {
@@ -215,7 +213,18 @@ class NginxCache {
 
 	}
 
-	public function purge_zone() {
+	public function purge_zone_once() {
+
+		static $completed = false;
+
+		if ( ! $completed ) {
+			$this->purge_zone();
+			$completed = true;
+		}
+
+	}
+
+	private function purge_zone() {
 
 		global $wp_filesystem;
 
