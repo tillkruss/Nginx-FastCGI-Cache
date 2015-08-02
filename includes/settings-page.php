@@ -3,7 +3,7 @@
 
 <div class="wrap">
 
-	<h2><?php _e( 'Nginx Cache', 'nginx' ); ?></h2>
+	<h1><?php _e( 'Nginx Cache', 'nginx' ); ?></h1>
 
 	<?php settings_errors(); ?>
 
