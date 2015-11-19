@@ -3,8 +3,8 @@ Contributors: tillkruess
 Donate link: http://till.kruss.me/donations/
 Tags: nginx, nginx cache, cache, caching, purge, purge cache, flush, flush cache, server, performance, optimize, speed, load, fastcgi, fastcgi purge, proxy, proxy purge, reverse proxy
 Requires at least: 3.1
-Tested up to: 4.0
 Stable tag: 1.0
+Tested up to: 4.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
