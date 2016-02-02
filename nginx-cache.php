@@ -247,13 +247,15 @@ class NginxCache {
 
 		// buffer output
 		ob_start();
+
 		$path = get_option( 'nginx_cache_path' );
+
 		// load WordPress file API?
 		if ( ! function_exists( 'request_filesystem_credentials' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
 
-		if ( ( $credentials = request_filesystem_credentials( '', 'direct', false, $path, null ) ) === false ) {
+		if ( ( $credentials = request_filesystem_credentials( '', '', false, $path, null, true ) ) === false ) {
 			ob_end_clean(); // prevent display of filesystem credentials form
 			return false;
 		}
