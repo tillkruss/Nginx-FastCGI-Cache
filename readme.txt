@@ -30,11 +30,16 @@ For detailed installation instructions, please read the [standard installation p
 3. Done.
 
 
+== Screenshots ==
+
+1. Plugin settings page.
+
+
 == Changelog ==
 
 = 1.0.1 =
 
-  *
+  * Improved testing of file-system credentials
 
 = 1.0 =
 
