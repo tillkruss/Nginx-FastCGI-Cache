@@ -247,6 +247,12 @@ class NginxCache {
 
 		$path = get_option( 'nginx_cache_path' );
 
+		// The $path is set; however the directory doesn't exist so let's try and
+		// create the directory before failing
+		if ( ! file_exists( $path ) ) {
+			mkdir( $path );
+		}
+
 		// load WordPress file API?
 		if ( ! function_exists( 'request_filesystem_credentials' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
