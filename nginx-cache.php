@@ -228,6 +228,10 @@ class NginxCache {
 
 		global $wp_filesystem;
 
+		if ( ! $this->should_purge() ) {
+			return false;
+		}
+
 		$path = get_option( 'nginx_cache_path' );
 		$path_error = $this->is_valid_path();
 
@@ -241,6 +245,21 @@ class NginxCache {
 
 		return true;
 
+	}
+
+	private function should_purge() {
+
+		$post_type = get_post_type();
+
+		if ( ! $post_type ) {
+			return true;
+		}
+
+		if ( ! in_array( $post_type, (array) apply_filters( 'nginx_cache_excluded_post_types', array() ) ) ) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private function initialize_filesystem() {
