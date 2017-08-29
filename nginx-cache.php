@@ -243,6 +243,9 @@ class NginxCache {
 		// remove cache directory (recursively)
 		$wp_filesystem->rmdir( $path, true );
 
+		// recreate the original folder
+        $wp_filesystem->mkdir( $path );
+
 		return true;
 
 	}
