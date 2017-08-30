@@ -244,7 +244,7 @@ class NginxCache {
 		$wp_filesystem->rmdir( $path, true );
 
 		// recreate the original folder
-        $wp_filesystem->mkdir( $path );
+		$wp_filesystem->mkdir( $path );
 
 		return true;
 
