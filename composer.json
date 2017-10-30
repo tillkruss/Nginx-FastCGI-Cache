@@ -1,0 +1,25 @@
+{
+  "name": "tillkruss/Nginx-FastCGI-Cache",
+  "type": "wordpress-plugin",
+  "license": "GPL-3.0",
+  "description": "A WordPress plugin that purges Nginx cache zones.",
+  "homepage": "https://wordpress.org/plugins/nginx-cache/",
+  "authors": [
+    {
+      "name": "Till Krüss",
+      "homepage": "https://till.im/"
+    }
+  ],
+  "keywords": [
+    "wordpress",
+    "wordpress-plugin"
+  ],
+  "support": {
+    "issues": "https://github.com/tillkruss/Nginx-FastCGI-Cache/issues",
+    "forum": "https://wordpress.org/support/plugin/nginx-cache"
+  },
+  "require": {
+    "php": ">=5.2.0",
+    "composer/installers": "~1.0"
+  }
+}
