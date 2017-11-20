@@ -3,8 +3,8 @@ Contributors: tillkruess
 Donate link: https://www.paypal.me/tillkruss
 Tags: nginx, nginx cache, cache, caching, purge, purge cache, flush, flush cache, server, performance, optimize, speed, load, fastcgi, fastcgi purge, proxy, proxy purge, reverse proxy
 Requires at least: 3.1
-Stable tag: 1.0.2
 Tested up to: 4.9
+Stable tag: 1.0.3
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -36,6 +36,12 @@ For detailed installation instructions, please read the [standard installation p
 
 
 == Changelog ==
+
+= 1.0.3 =
+
+  * Create cache directory if it doesn't exists
+  * Re-create cache directory after cache purge
+  * Allow post types to be excluded from triggering a cache purge
 
 = 1.0.2 =
 
