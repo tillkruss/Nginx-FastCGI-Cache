@@ -240,10 +240,10 @@ class NginxCache {
 			return $path_error;
 		}
 
-		// remove cache directory (recursively)
+		// delete cache directory (recursively)
 		$wp_filesystem->rmdir( $path, true );
 
-		// recreate the original folder
+		// recreate empty cache directory
 		$wp_filesystem->mkdir( $path );
 
 		return true;
@@ -269,8 +269,7 @@ class NginxCache {
 
 		$path = get_option( 'nginx_cache_path' );
 
-		// The $path is set; however the directory doesn't exist so let's try and
-		// create the directory before failing
+		// if the cache directory doesn't exist, try to create it
 		if ( ! file_exists( $path ) ) {
 			mkdir( $path );
 		}
