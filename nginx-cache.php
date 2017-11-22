@@ -140,7 +140,7 @@ class NginxCache {
 	public function add_plugin_actions_links( $links ) {
 
 		// add settings link to plugin actions
-		return array_merge( 
+		return array_merge(
 			array( '<a href="' . admin_url( $this->admin_page ) . '">' . __( 'Settings', 'nginx-cache' ) . '</a>' ),
 			$links
 		);
