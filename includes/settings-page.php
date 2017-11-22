@@ -16,7 +16,7 @@
 				<th scope="row"><?php _e( 'Cache Zone Path', 'nginx-cache' ); ?></th>
 				<td>
 					<input type="text" class="regular-text code" name="nginx_cache_path" placeholder="/data/nginx/cache" value="<?php echo esc_attr( get_option( 'nginx_cache_path' ) ); ?>" />
-					<p class="description"><?php _e( 'The absolute path to the location of the cache zone, specified in the Nginx <code>fastcgi_cache_path</code> or <code>proxy_cache_path</code> directive.', 'nginx-cache' ) ?></p>
+					<p class="description"><?php _e( 'The absolute path to the location of the cache zone, specified in the Nginx <code>fastcgi_cache_path</code> or <code>proxy_cache_path</code> directive.', 'nginx-cache' ); ?></p>
 				</td>
 			</tr>
 			<tr valign="top">
