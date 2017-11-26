@@ -35,6 +35,11 @@ class NginxCache {
 		add_action( 'load-' . $this->screen, array( $this, 'do_admin_actions' ) );
 		add_action( 'load-' . $this->screen, array( $this, 'add_settings_notices' ) );
 
+		add_action( 'after_setup_theme', array( $this, 'register_purge_actions' ), 20 );
+	}
+
+	public function register_purge_actions() {
+
 		// use `nginx_cache_purge_actions` filter to alter default purge actions
 		$purge_actions = (array) apply_filters(
 			'nginx_cache_purge_actions',
@@ -46,7 +51,11 @@ class NginxCache {
 		);
 
 		foreach ( $purge_actions as $action ) {
-			add_action( $action, array( $this, 'purge_zone_once' ) );
+			if ( did_action( $action ) ) {
+				$this->purge_zone_once();
+			} else {
+				add_action( $action, array( $this, 'purge_zone_once' ) );
+			}
 		}
 
 	}
