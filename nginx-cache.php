@@ -28,14 +28,13 @@ class NginxCache {
 		add_filter( 'option_nginx_auto_purge', 'absint' );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'add_plugin_actions_links' ) );
 
+		add_action( 'init', array( $this, 'register_purge_actions' ), 20 );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_menu', array( $this, 'add_admin_menu_page' ) );
 		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_node' ), 100 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_styles' ) );
 		add_action( 'load-' . $this->screen, array( $this, 'do_admin_actions' ) );
 		add_action( 'load-' . $this->screen, array( $this, 'add_settings_notices' ) );
-
-		add_action( 'after_setup_theme', array( $this, 'register_purge_actions' ), 20 );
 	}
 
 	public function register_purge_actions() {
