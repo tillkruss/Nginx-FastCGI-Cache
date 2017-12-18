@@ -133,7 +133,7 @@ class NginxCache {
 		// add "Tools" sub-page
 		add_management_page(
 			__( 'Nginx Cache', 'nginx-cache' ),
-			__( 'Nginx', 'nginx-cache' ),
+			__( 'Nginx Cache', 'nginx-cache' ),
 			$this->capability,
 			'nginx-cache',
 			array( $this, 'show_settings_page' )
