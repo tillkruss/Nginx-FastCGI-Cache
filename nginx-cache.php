@@ -185,7 +185,8 @@ class NginxCache {
 			}
 
 			$list = $wp_filesystem->dirlist( $path, true, true );
-			if ( ! $this->validate_dirlist( $list ) ) {
+
+			if ( is_array( $list ) && ! $this->validate_dirlist( $list ) ) {
 				return new WP_Error( 'fs', __( '"Cache Zone Path" does not appear to be a Nginx cache zone directory.', 'nginx-cache' ) );
 			}
 
