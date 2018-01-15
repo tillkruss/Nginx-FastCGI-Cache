@@ -31,6 +31,7 @@ class NginxCache {
 		if ( get_option( 'nginx_auto_purge' ) ) {
 			add_action( 'init', array( $this, 'register_purge_actions' ), 20 );
 		}
+
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_menu', array( $this, 'add_admin_menu_page' ) );
 		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_node' ), 100 );
