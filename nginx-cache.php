@@ -258,7 +258,7 @@ class NginxCache {
 		// recreate empty cache directory
 		$wp_filesystem->mkdir( $path );
 		
-		do_action( 'nginx-cache_after_purge_zone', $path );
+		do_action( 'nginx_cache_zone_purged', $path );
 
 		return true;
 
