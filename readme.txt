@@ -1,6 +1,6 @@
 === Nginx Cache ===
 Contributors: tillkruess
-Donate link: https://www.paypal.me/tillkruss
+Donate link: https://github.com/sponsors/tillkruss
 Tags: nginx, nginx cache, cache, caching, purge, purge cache, flush, flush cache, server, performance, optimize, speed, load, fastcgi, fastcgi purge, proxy, proxy purge, reverse proxy
 Requires at least: 3.1
 Tested up to: 5.2
