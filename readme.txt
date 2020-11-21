@@ -3,8 +3,8 @@ Contributors: tillkruess
 Donate link: https://github.com/sponsors/tillkruss
 Tags: nginx, nginx cache, cache, caching, purge, purge cache, flush, flush cache, server, performance, optimize, speed, load, fastcgi, fastcgi purge, proxy, proxy purge, reverse proxy
 Requires at least: 3.1
-Stable tag: 1.0.4
 Tested up to: 5.6
+Stable tag: 1.0.5
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -36,6 +36,10 @@ For detailed installation instructions, please read the [standard installation p
 
 
 == Changelog ==
+
+= 1.0.4 =
+
+  * Added `nginx_cache_zone_purged` action
 
 = 1.0.4 =
 
