@@ -7,7 +7,7 @@ Version: 1.0.4
 Text Domain: nginx-cache
 Domain Path: /languages
 Author: Till Krüss
-Author URI: http://till.kruss.me/
+Author URI: http://till.im/
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 */
