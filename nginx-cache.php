@@ -207,6 +207,23 @@ class NginxCache {
 
 	private function validate_dirlist( $list ) {
 
+	// Fix for '"Cache Zone Path" does not appear to be a Nginx cache zone directory' error
+	//
+	// Thanks to @victorsts for this fix!
+	//
+	// Logic: If item is a valid file and it's name has a dot, stop the execution and return true. 
+	//
+	// Reason: Nginx sometimes creates cache files like:
+        // /var/www/site/nginx-cache/b/db/891535e53e15b5ddef11154f9a403dbb
+        // /var/www/site/nginx-cache/b/db/891535e53e15b5ddef11154f9a403dbb.0000017454
+	//
+	// Reference: https://wordpress.org/support/topic/cache-zone-path-does-not-appear-to-be-a-nginx-cache-zone-directory-2/
+
+        if ( $item[ 'type' ] === 'f' && strpos($item, ".") !== false ) {
+              return true;
+         }
+	// End of Fix
+
 		foreach ( $list as $item ) {
 
 			// abort if file is not a MD5 hash
