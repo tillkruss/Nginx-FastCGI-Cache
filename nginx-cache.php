@@ -207,6 +207,11 @@ class NginxCache {
 
 	private function validate_dirlist( $list ) {
 
+		// https://wordpress.org/support/topic/cache-zone-path-does-not-appear-to-be-a-nginx-cache-zone-directory-2/
+		if ( $item[ 'type' ] === 'f' && strpos( $item, "." ) !== false ) {
+			return true;
+		}
+
 		foreach ( $list as $item ) {
 
 			// abort if file is not a MD5 hash
