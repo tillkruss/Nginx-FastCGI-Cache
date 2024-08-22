@@ -37,6 +37,10 @@ For detailed installation instructions, please read the [standard installation p
 
 == Changelog ==
 
+= 1.0.6 =
+
+  * Fixed rare issue in `validate_dirlist()`
+
 = 1.0.5 =
 
   * Added `nginx_cache_zone_purged` action
