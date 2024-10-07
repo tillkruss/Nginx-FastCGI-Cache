@@ -209,7 +209,7 @@ class NginxCache {
 		foreach ( $list as $item ) {
 
 			// https://wordpress.org/support/topic/cache-zone-path-does-not-appear-to-be-a-nginx-cache-zone-directory-2/
-			if ( $item[ 'type' ] === 'f' && strpos( $item, "." ) !== false ) {
+			if ( $item[ 'type' ] === 'f' && strpos( $item[ 'name' ], "." ) !== false ) {
 				return true;
 			}
 
